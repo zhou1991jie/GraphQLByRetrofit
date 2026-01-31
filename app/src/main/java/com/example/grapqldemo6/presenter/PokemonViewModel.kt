@@ -2,7 +2,6 @@ package com.example.grapqldemo6.presenter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.grapqldemo6.data.model.PokemonSpecies
 import com.example.grapqldemo6.domain.usecase.PokemonUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +25,11 @@ class PokemonViewModel @Inject constructor(
 
     fun updateSearchText(text: String) {
         _searchText.value = text
+        // 当用户修改搜索文本时，重置为 Idle 状态，避免自动显示未找到结果的提示
+        val currentState = _state.value
+        if (currentState is PokemonState.Success) {
+            _state.value = PokemonState.Idle
+        }
     }
 
     fun searchPokemon() {
