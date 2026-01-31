@@ -36,8 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.layout.layout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.data.model.PokemonSpecies
@@ -320,9 +318,7 @@ fun PokemonSpeciesItem(
                                 TextWithStroke(
                                     text = pokemon.name,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    textColor = Color.Black,
-                                    strokeColor = Color.White,
-                                    strokeWidth = 2f,
+                                    backgroundColor = color,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -354,125 +350,40 @@ fun TextWithStroke(
     text: String,
     style: TextStyle,
     textColor: Color = Color.Black,
-    strokeColor: Color = Color.White,
-    strokeWidth: Float = 2f,
+    backgroundColor: Color = Color.Transparent,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip
 ) {
-    val strokeWidthDp = strokeWidth.dp
-    Box {
-        // 绘制白色描边
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(-strokeWidthDp.roundToPx(), -strokeWidthDp.roundToPx())
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(-strokeWidthDp.roundToPx(), 0)
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(-strokeWidthDp.roundToPx(), strokeWidthDp.roundToPx())
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(0, -strokeWidthDp.roundToPx())
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(0, strokeWidthDp.roundToPx())
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(strokeWidthDp.roundToPx(), -strokeWidthDp.roundToPx())
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(strokeWidthDp.roundToPx(), 0)
-                }
-            }
-        )
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = strokeColor,
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(strokeWidthDp.roundToPx(), strokeWidthDp.roundToPx())
-                }
-            }
-        )
-        // 绘制文字本身
-        Text(
-            text = text,
-            style = style,
-            maxLines = maxLines,
-            overflow = overflow,
-            color = textColor
-        )
+    // 计算适合的文字颜色（基于背景亮度）
+    val displayColor = if (backgroundColor != Color.Transparent) {
+        getContrastColor(backgroundColor)
+    } else {
+        textColor
     }
+    
+    Text(
+        text = text,
+        style = style.copy(color = displayColor),
+        maxLines = maxLines,
+        overflow = overflow
+    )
+}
+
+// 根据背景颜色计算对比度最高的文字颜色
+private fun getContrastColor(backgroundColor: Color): Color {
+    // 计算背景的亮度（使用相对亮度公式）
+    val brightness = calculateBrightness(backgroundColor)
+    
+    // 根据亮度返回黑色或白色，确保最高对比度
+    return if (brightness > 0.5) {
+        Color.Black // 浅色背景用黑色文字
+    } else {
+        Color.White // 深色背景用白色文字
+    }
+}
+
+// 计算颜色的相对亮度（0-1，0为黑色，1为白色）
+private fun calculateBrightness(color: Color): Float {
+    // 使用标准的相对亮度公式
+    return (0.299f * color.red + 0.587f * color.green + 0.114f * color.blue)
 }
