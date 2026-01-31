@@ -1,59 +1,36 @@
 package com.example.grapqldemo6.data
 
+import com.example.grapqldemo6.data.model.PokemonData
+import com.example.grapqldemo6.domain.PokemonApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import javax.inject.Inject
 
-class PokemonRepository {
+class PokemonRepository @Inject constructor(
+    private val pokemonApiService: PokemonApiService
+) {
 
-    private val pageSize = 20
+    private val pageSize = 10
 
     suspend fun searchPokemonByName(name: String, page: Int = 0): Result<PokemonData> {
         return withContext(Dispatchers.IO) {
             try {
-                // 1. 构建 GraphQL 查询
-                val query = """
-                    query searchPokemonSpecies(${'$'}name: String, ${'$'}limit: Int, ${'$'}offset: Int) {
-                        pokemon_v2_pokemonspecies(where: {name: {_ilike: ${'$'}name}}, limit: ${'$'}limit, offset: ${'$'}offset) {
-                            id
-                            name
-                            capture_rate
-                            pokemon_v2_pokemoncolor {
-                                id
-                                name
-                            }
-                            pokemon_v2_pokemons {
-                                id
-                                name
-                                pokemon_v2_pokemonabilities {
-                                    id
-                                    pokemon_v2_ability {
-                                        name
-                                    }
-                                }
-                            }
-                        }
-                    }
-                """.trimIndent()
-
-                // 2. 设置查询变量（支持模糊搜索和分页）
+                val query = GraphQLQueries.SEARCH_POKEMON_SPECIES
                 val variables = mapOf(
                     "name" to "%$name%",
                     "limit" to pageSize,
                     "offset" to page * pageSize
                 )
 
-                // 3. 创建请求体
                 val request = GraphQLRequest(
                     query = query,
                     variables = variables
                 )
 
-                // 4. 发送请求
                 val response: Response<GraphQLResponse<PokemonData>> =
-                    ApiClient.pokemonService.searchPokemon(request)
+                    pokemonApiService.searchPokemon(request)
 
-                // 5. 处理响应
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body?.errors.isNullOrEmpty()) {

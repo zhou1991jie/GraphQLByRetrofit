@@ -2,21 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.apollographql.apollo")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 
 }
 
-apollo {
-    service("service") {
-        packageName.set("com.example.rocketreserver")
-        introspection {
-            endpointUrl.set("https://countries.trevorblades.com/graphql")
-            schemaFile.set(file("src/main/graphql/schema.graphqls"))
-        }
-    }
-}
+
 
 android {
     namespace = "com.example.grapqldemo6"
@@ -24,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.grapqldemo6"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -65,8 +56,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("com.apollographql.apollo:apollo-runtime:4.3.3")
-    implementation("com.apollographql.apollo:apollo-api:4.3.3")
     implementation("com.google.dagger:hilt-android:2.57.1")
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")
     implementation("androidx.hilt:hilt-lifecycle-viewmodel-compose:1.3.0")
@@ -87,6 +76,9 @@ dependencies {
 
 
     testImplementation(libs.junit)
+    testImplementation("org.mockito:mockito-core:5.10.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

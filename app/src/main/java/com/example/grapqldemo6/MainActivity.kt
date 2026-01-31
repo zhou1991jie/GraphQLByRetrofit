@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.grapqldemo6.ui.screen.PokemonApp
-import com.example.grapqldemo6.ui.theme.GrapqlDemo6Theme
+import com.example.grapqldemo6.ui.theme.PokemonAppTheme
 import com.example.grapqldemo6.util.PreferenceManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GrapqlDemo6Theme {
+            PokemonAppTheme {
                 PokemonApp(preferenceManager = preferenceManager)
             }
         }

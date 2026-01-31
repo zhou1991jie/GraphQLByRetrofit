@@ -2,6 +2,7 @@ package com.example.grapqldemo6.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 class PreferenceManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -16,6 +17,6 @@ class PreferenceManager(context: Context) {
     }
 
     fun setFirstLaunchCompleted() {
-        prefs.edit().putBoolean(KEY_IS_FIRST_LAUNCH, false).apply()
+        prefs.edit() { putBoolean(KEY_IS_FIRST_LAUNCH, false) }
     }
 }

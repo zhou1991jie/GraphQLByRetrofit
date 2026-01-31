@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.grapqldemo6.ui.theme.Dimens
 
 @Composable
 fun WelcomeScreen(onNavigateToHome: () -> Unit) {
@@ -27,7 +28,7 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
                 text = "欢迎使用宝可梦图鉴",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = Dimens.spacingLarge)
             )
             Text(
                 text = "探索宝可梦的奇妙世界",
@@ -36,7 +37,7 @@ fun WelcomeScreen(onNavigateToHome: () -> Unit) {
             )
             Button(
                 onClick = onNavigateToHome,
-                modifier = Modifier.padding(top = 32.dp)
+                modifier = Modifier.padding(top = Dimens.spacingExtraLarge)
             ) {
                 Text("开始探索")
             }

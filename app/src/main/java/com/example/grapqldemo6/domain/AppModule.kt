@@ -1,7 +1,7 @@
-package com.example.grapqldemo6.dimain
+package com.example.grapqldemo6.domain
 
 import android.content.Context
-import com.example.grapqldemo6.data.PokemonRepository
+import com.example.grapqldemo6.data.ApiClient
 import com.example.grapqldemo6.util.PreferenceManager
 import dagger.Module
 import dagger.Provides
@@ -16,8 +16,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePokemonRepository(): PokemonRepository {
-        return PokemonRepository()
+    fun providePokemonApiService(): PokemonApiService {
+        return ApiClient.pokemonService
     }
 
     @Provides

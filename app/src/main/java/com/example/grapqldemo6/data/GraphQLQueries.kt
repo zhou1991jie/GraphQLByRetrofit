@@ -1,0 +1,27 @@
+package com.example.grapqldemo6.data
+
+object GraphQLQueries {
+    val SEARCH_POKEMON_SPECIES = """
+        query searchPokemonSpecies(${'$'}name: String, ${'$'}limit: Int, ${'$'}offset: Int) {
+            pokemon_v2_pokemonspecies(where: {name: {_ilike: ${'$'}name}}, limit: ${'$'}limit, offset: ${'$'}offset) {
+                id
+                name
+                capture_rate
+                pokemon_v2_pokemoncolor {
+                    id
+                    name
+                }
+                pokemon_v2_pokemons {
+                    id
+                    name
+                    pokemon_v2_pokemonabilities {
+                        id
+                        pokemon_v2_ability {
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    """.trimIndent()
+}

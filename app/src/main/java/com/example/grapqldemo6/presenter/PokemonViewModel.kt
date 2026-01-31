@@ -2,8 +2,8 @@ package com.example.grapqldemo6.presenter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.grapqldemo6.data.PokemonRepository
-import com.example.grapqldemo6.data.PokemonSpecies
+import com.example.grapqldemo6.data.model.PokemonSpecies
+import com.example.grapqldemo6.domain.usecase.PokemonUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,104 +13,100 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PokemonViewModel @Inject constructor(
-    private val pokemonRepository: PokemonRepository
+    private val pokemonUseCase: PokemonUseCase
 ) : ViewModel() {
 
     private val _searchText = MutableStateFlow("")
     val searchText: StateFlow<String> = _searchText.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _searchResults = MutableStateFlow<List<PokemonSpecies>>(emptyList())
-    val searchResults: StateFlow<List<PokemonSpecies>> = _searchResults.asStateFlow()
-
-    private val _hasNextPage = MutableStateFlow(true)
-    val hasNextPage: StateFlow<Boolean> = _hasNextPage.asStateFlow()
-
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
-    
-    private val _hasSearched = MutableStateFlow(false)
-    val hasSearched: StateFlow<Boolean> = _hasSearched.asStateFlow()
+    private val _state = MutableStateFlow<PokemonState>(PokemonState.Idle)
+    val state: StateFlow<PokemonState> = _state.asStateFlow()
 
     private var currentPage = 0
 
     fun updateSearchText(text: String) {
         _searchText.value = text
-        _errorMessage.value = null
-        _hasSearched.value = false
     }
 
     fun searchPokemon() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null
-            _hasSearched.value = true
+            _state.value = PokemonState.Loading
             try {
-                val result = pokemonRepository.searchPokemonByName(
+                val result = pokemonUseCase.searchPokemonByName(
                     name = _searchText.value,
                     page = 0
                 )
                 if (result.isSuccess) {
                     val pokemonData = result.getOrNull()
                     val speciesList = pokemonData?.pokemon_v2_pokemonspecies ?: emptyList()
-                    _searchResults.value = speciesList
                     currentPage = 0
-                    _hasNextPage.value = speciesList.isNotEmpty()
+                    _state.value = PokemonState.Success(
+                        results = speciesList,
+                        hasNextPage = speciesList.isNotEmpty(),
+                        hasSearched = true
+                    )
                 } else {
-                    // 处理错误
-                    _errorMessage.value = result.exceptionOrNull()?.message ?: "搜索失败"
-                    _searchResults.value = emptyList()
-                    _hasNextPage.value = false
+                    _state.value = PokemonState.Error(
+                        message = result.exceptionOrNull()?.message ?: "搜索失败"
+                    )
                 }
             } catch (e: Exception) {
-                // 处理错误
-                _errorMessage.value = "网络错误，请稍后重试"
-                _searchResults.value = emptyList()
-                _hasNextPage.value = false
-            } finally {
-                _isLoading.value = false
+                _state.value = PokemonState.Error(
+                    message = "网络错误，请稍后重试"
+                )
             }
         }
     }
 
     fun loadNextPage() {
-        if (!_hasNextPage.value || _isLoading.value) return
+        val currentState = _state.value
+        if (currentState !is PokemonState.Success || currentState.hasNextPage.not() || currentState.isLoadingMore) return
 
         viewModelScope.launch {
-            _isLoading.value = true
+            _state.value = currentState.copy(isLoadingMore = true)
             try {
-                val nextPage = currentPage + 1
-                val result = pokemonRepository.searchPokemonByName(
+                val result = pokemonUseCase.loadNextPage(
                     name = _searchText.value,
-                    page = nextPage
+                    currentPage = currentPage
                 )
                 if (result.isSuccess) {
                     val pokemonData = result.getOrNull()
                     val speciesList = pokemonData?.pokemon_v2_pokemonspecies ?: emptyList()
                     if (speciesList.isNotEmpty()) {
-                        _searchResults.value = _searchResults.value + speciesList
-                        currentPage = nextPage
+                        currentPage++
+                        _state.value = PokemonState.Success(
+                            results = currentState.results + speciesList,
+                            hasNextPage = true,
+                            hasSearched = true,
+                            isNewSearch = false,
+                            isLoadingMore = false
+                        )
                     } else {
-                        _hasNextPage.value = false
+                        _state.value = PokemonState.Success(
+                            results = currentState.results,
+                            hasNextPage = false,
+                            hasSearched = true,
+                            isNewSearch = false,
+                            isLoadingMore = false
+                        )
                     }
                 } else {
-                    // 处理错误
-                    _errorMessage.value = result.exceptionOrNull()?.message ?: "加载更多失败"
-                    _hasNextPage.value = false
+                    _state.value = PokemonState.Error(
+                        message = result.exceptionOrNull()?.message ?: "加载更多失败"
+                    )
                 }
             } catch (e: Exception) {
-                // 处理错误
-                _errorMessage.value = "网络错误，请稍后重试"
-                _hasNextPage.value = false
-            } finally {
-                _isLoading.value = false
+                _state.value = PokemonState.Error(
+                    message = "网络错误，请稍后重试"
+                )
             }
         }
     }
 
     fun clearError() {
-        _errorMessage.value = null
+        val currentState = _state.value
+        if (currentState is PokemonState.Error) {
+            _state.value = PokemonState.Idle
+        }
     }
 }

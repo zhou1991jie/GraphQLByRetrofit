@@ -19,7 +19,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.grapqldemo6.data.Pokemon
+import com.example.grapqldemo6.data.model.Pokemon
+import com.example.grapqldemo6.ui.theme.Dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,12 +44,12 @@ fun DetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(Dimens.spacingLarge)
         ) {
             Text(
                 text = pokemon.name,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = Dimens.spacingLarge)
             )
 
             Text("技能列表:", style = MaterialTheme.typography.bodyLarge)
@@ -58,11 +59,11 @@ fun DetailScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(4.dp)
+                            .padding(Dimens.spacingExtraSmall)
                     ) {
                         Text(
                             text = ability.pokemon_v2_ability.name ?: "未知技能",
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(Dimens.spacingLarge)
                         )
                     }
                 }

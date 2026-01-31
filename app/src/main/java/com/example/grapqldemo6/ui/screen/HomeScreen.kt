@@ -18,36 +18,41 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.layout.layout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.grapqldemo6.data.Pokemon
-import com.example.grapqldemo6.data.PokemonSpecies
+import com.example.grapqldemo6.data.model.Pokemon
+import com.example.grapqldemo6.data.model.PokemonSpecies
+import com.example.grapqldemo6.presenter.PokemonState
 import com.example.grapqldemo6.presenter.PokemonViewModel
+import com.example.grapqldemo6.ui.theme.Dimens
+import com.example.grapqldemo6.ui.theme.*
 
 
 @Composable
@@ -56,27 +61,16 @@ fun HomeScreen(
     viewModel: PokemonViewModel = hiltViewModel()
 ) {
     val searchText = viewModel.searchText.collectAsState()
-    val isLoading = viewModel.isLoading.collectAsState()
-    val searchResults = viewModel.searchResults.collectAsState()
-    val hasNextPage = viewModel.hasNextPage.collectAsState()
-    val errorMessage = viewModel.errorMessage.collectAsState()
-    val hasSearched = viewModel.hasSearched.collectAsState()
+    val state = viewModel.state.collectAsState()
     
     // 记住列表状态
     val listState = rememberLazyListState()
-    
-    // 当搜索结果变化时，平滑滚动到顶部
-    LaunchedEffect(searchResults.value) {
-        if (searchResults.value.isNotEmpty()) {
-            listState.animateScrollToItem(0)
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 48.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(top = Dimens.spacingXLarge, start = Dimens.spacingLarge, end = Dimens.spacingLarge, bottom = Dimens.spacingLarge)
         ) {
             // 搜索框和按钮
             Row (
@@ -91,18 +85,18 @@ fun HomeScreen(
                     singleLine = true
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Dimens.spacingMedium))
 
                 Button(
                     onClick = { viewModel.searchPokemon() },
-                    enabled = searchText.value.isNotBlank() && !isLoading.value,
-                    modifier = Modifier.height(56.dp)
+                    enabled = searchText.value.isNotBlank() && state.value !is PokemonState.Loading,
+                    modifier = Modifier.height(Dimens.buttonHeight)
                 ) {
-                    if (isLoading.value) {
+                    if (state.value is PokemonState.Loading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(Dimens.iconSmall),
                             color = Color.White,
-                            strokeWidth = 2.dp
+                            strokeWidth = Dimens.progressStrokeSmall
                         )
                     } else {
                         Text("搜索")
@@ -110,82 +104,110 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dimens.spacingLarge))
 
-            // 错误信息
-            errorMessage.value?.let {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = it,
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // 搜索结果列表
-            if (searchResults.value.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    items(searchResults.value) { species ->
-                        PokemonSpeciesItem(
-                            species = species,
-                            onPokemonClick = onPokemonClick
+            when (val currentState = state.value) {
+                is PokemonState.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Dimens.spacingMedium),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = currentState.message,
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
+                    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+                }
+                is PokemonState.Success -> {
+                    if (currentState.results.isNotEmpty()) {
+                        // 当搜索结果变化时，平滑滚动到顶部（仅在新搜索时）
+                        LaunchedEffect(currentState.results.size) {
+                            if (currentState.isNewSearch) {
+                                listState.animateScrollToItem(0)
+                            }
+                        }
 
-                    // 分页加载指示器
-                    item {
-                        if (hasNextPage.value) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = listState,
+                            contentPadding = PaddingValues(bottom = Dimens.listContentPadding)
+                        ) {
+                            items(currentState.results) { species ->
+                                PokemonSpeciesItem(
+                                    species = species,
+                                    onPokemonClick = onPokemonClick
+                                )
                             }
 
-                            LaunchedEffect(Unit) {
-                                viewModel.loadNextPage()
+                            // 加载更多的loading item
+                            item {
+                                // 当滚动到这个item时，触发加载更多
+                                if (currentState.hasNextPage && !currentState.isLoadingMore) {
+                                    LaunchedEffect(Unit) {
+                                        viewModel.loadNextPage()
+                                    }
+                                }
+
+                                if (currentState.isLoadingMore) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(Dimens.spacingLarge),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(Dimens.iconMedium),
+                                                strokeWidth = Dimens.progressStrokeSmall
+                                            )
+                                            Spacer(modifier = Modifier.height(Dimens.spacingMedium))
+                                            Text(
+                                                text = "加载中...",
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    }
+                                }
                             }
+                        }
+                    } else if (currentState.hasSearched && searchText.value.isNotBlank()) {
+                        // 空状态 - 搜索后未找到结果
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("未找到相关宝可梦", style = MaterialTheme.typography.titleLarge)
                         }
                     }
                 }
-            } else if (hasSearched.value && searchText.value.isNotBlank() && !isLoading.value && errorMessage.value == null) {
-                // 空状态 - 搜索后未找到结果
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("未找到相关宝可梦", style = MaterialTheme.typography.titleLarge)
+                is PokemonState.Idle -> {
+                    // 默认空白状态 - 提示用户搜索
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("搜索更多宝可梦", style = MaterialTheme.typography.titleLarge)
+                    }
                 }
-            } else if (!hasSearched.value) {
-                // 默认空白状态 - 提示用户搜索
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("搜索更多宝可梦", style = MaterialTheme.typography.titleLarge)
+                is PokemonState.Loading -> {
+                    // 加载状态已在下方处理
                 }
             }
         }
 
         // 全屏加载动画
-        if (isLoading.value && searchResults.value.isEmpty()) {
+        if (state.value is PokemonState.Loading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color.White.copy(alpha = 0.8f)),
+                    .background(color = Color.White.copy(alpha = 0f)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -193,10 +215,10 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp),
-                        strokeWidth = 4.dp
+                        modifier = Modifier.size(Dimens.iconLarge),
+                        strokeWidth = Dimens.progressStrokeLarge
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
                     Text(
                         text = "搜索中...",
                         style = MaterialTheme.typography.titleMedium
@@ -216,15 +238,15 @@ fun PokemonSpeciesItem(
     
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                .fillMaxWidth()
+                .padding(Dimens.spacingMedium),
+        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevation),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(Dimens.spacingLarge)
         ) {
             Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -241,9 +263,9 @@ fun PokemonSpeciesItem(
                         )
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.Red)
-                                .padding(8.dp, 4.dp)
+                            .clip(RoundedCornerShape(Dimens.borderRadiusMedium))
+                            .background(Color.Red)
+                            .padding(Dimens.spacingMedium, Dimens.spacingExtraSmall)
                         ) {
                             Text(
                                 text = "捕获率: ${species.capture_rate}",
@@ -254,14 +276,14 @@ fun PokemonSpeciesItem(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
 
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF1976D2))
-                            .padding(8.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.borderRadiusSmall))
+                        .background(Color(0xFF1976D2))
+                        .padding(Dimens.spacingMedium)
                     ) {
                         Text("包含的宝可梦:", 
                             style = MaterialTheme.typography.titleMedium, 
@@ -270,27 +292,29 @@ fun PokemonSpeciesItem(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Dimens.spacingMedium))
 
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.listSpacing),
+                        verticalArrangement = Arrangement.spacedBy(Dimens.listSpacing)
                     ) {
                         species.pokemon_v2_pokemons?.forEachIndexed { index, pokemon ->
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(Dimens.borderRadiusSmall))
                                     .background(color)
                                     .clickable {
                                         onPokemonClick(pokemon)
                                     }
-                                    .padding(6.dp)
+                                    .padding(Dimens.spacingSmall)
                             ) {
-                                Text(
+                                TextWithStroke(
                                     text = pokemon.name,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Black,
+                                    textColor = Color.Black,
+                                    strokeColor = Color.White,
+                                    strokeWidth = 2f,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -301,19 +325,146 @@ fun PokemonSpeciesItem(
     }
 }
 
-@Composable
 fun getColorFromName(colorName: String): Color {
     return when (colorName) {
-        "red" -> Color.Red
-        "blue" -> Color.Blue
-        "green" -> Color.Green
-        "yellow" -> Color.Yellow
-        "purple" -> Color(0xFF9C27B0)
-        "pink" -> Color(0xFFE91E63)
-        "brown" -> Color(0xFF795548)
-        "gray" -> Color.Gray
-        "black" -> Color.Black
-        "white" -> Color(0xFF757575)
-        else -> Color(0xFF757575)
+        "red" -> PokemonRed
+        "blue" -> PokemonBlue
+        "green" -> PokemonGreen
+        "yellow" -> PokemonYellow
+        "purple" -> PokemonPurple
+        "pink" -> PokemonPink
+        "brown" -> PokemonBrown
+        "gray" -> PokemonGray
+        "black" -> PokemonBlack
+        "white" -> PokemonDefault
+        else -> PokemonDefault
+    }
+}
+
+@Composable
+fun TextWithStroke(
+    text: String,
+    style: TextStyle,
+    textColor: Color = Color.Black,
+    strokeColor: Color = Color.White,
+    strokeWidth: Float = 2f,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+    val strokeWidthDp = strokeWidth.dp
+    Box {
+        // 绘制白色描边
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(-strokeWidthDp.roundToPx(), -strokeWidthDp.roundToPx())
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(-strokeWidthDp.roundToPx(), 0)
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(-strokeWidthDp.roundToPx(), strokeWidthDp.roundToPx())
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(0, -strokeWidthDp.roundToPx())
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(0, strokeWidthDp.roundToPx())
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(strokeWidthDp.roundToPx(), -strokeWidthDp.roundToPx())
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(strokeWidthDp.roundToPx(), 0)
+                }
+            }
+        )
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = strokeColor,
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(strokeWidthDp.roundToPx(), strokeWidthDp.roundToPx())
+                }
+            }
+        )
+        // 绘制文字本身
+        Text(
+            text = text,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = textColor
+        )
     }
 }

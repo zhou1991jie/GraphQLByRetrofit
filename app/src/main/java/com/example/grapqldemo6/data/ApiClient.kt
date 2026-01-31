@@ -1,6 +1,6 @@
 package com.example.grapqldemo6.data
 
-import com.example.grapqldemo6.dimain.PokemonApiService
+import com.example.grapqldemo6.domain.PokemonApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,18 +9,15 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
-    private const val BASE_URL = "https://beta.pokeapi.co/graphql/v1beta/"
-
-    // 创建带日志拦截器的 OkHttpClient
     private fun provideOkHttpClient(): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(ApiConstants.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(ApiConstants.READ_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(ApiConstants.WRITE_TIMEOUT, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
             .addInterceptor { chain ->
                 val original = chain.request()
@@ -31,10 +28,9 @@ object ApiClient {
             .build()
     }
 
-    // 创建 Retrofit 实例
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(ApiConstants.BASE_URL)
             .client(provideOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
