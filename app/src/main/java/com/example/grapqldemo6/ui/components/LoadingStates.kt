@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -47,18 +45,32 @@ fun FullScreenLoading() {
 }
 
 @Composable
-fun ErrorState(message: String) {
+fun ErrorState(message: String, onRetry: (() -> Unit)? = null) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(Dimens.spacingMedium),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = message,
-            color = Color.Red,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = message,
+                color = Color.Red,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            onRetry?.let {
+                Spacer(modifier = Modifier.height(Dimens.spacingMedium))
+                androidx.compose.material3.TextButton(
+                    onClick = it
+                ) {
+                    Text(
+                        text = stringResource(R.string.tap_to_retry),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 

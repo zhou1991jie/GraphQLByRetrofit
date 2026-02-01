@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +36,7 @@ import com.example.grapqldemo6.ui.components.SearchErrorText
 import com.example.grapqldemo6.ui.theme.Dimens
 import com.example.grapqldemo6.util.isFalse
 import com.example.grapqldemo6.util.isTrue
+import com.example.grapqldemo6.util.isNull
 
 @Composable
 fun HomeScreen(
@@ -42,15 +44,19 @@ fun HomeScreen(
     viewModel: PokemonViewModel = hiltViewModel()
 ) {
     val searchText by viewModel.searchText.collectAsState()
-    val hasInvalidInput by viewModel.hasInvalidInput.collectAsState()
+    val inputError by viewModel.inputError.collectAsState()
     val state by viewModel.state.collectAsState()
-    
+
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,7 +77,7 @@ fun HomeScreen(
         ) {
             SearchBar(
                 searchText = searchText,
-                isInputValid = hasInvalidInput.isFalse(),
+                isInputValid = inputError.isNull(),
                 isLoading = state is PokemonState.Loading,
                 onSearchTextChange = { viewModel.updateSearchText(it) },
                 onSearchClick = {
@@ -83,8 +89,12 @@ fun HomeScreen(
             )
 
             SearchErrorText(
-                showError = hasInvalidInput.isTrue(),
-                modifier = Modifier.padding(top = Dimens.spacingExtraSmall, start = Dimens.spacingMedium, end = Dimens.spacingMedium)
+                errorMessage = inputError,
+                modifier = Modifier.padding(
+                    top = Dimens.spacingExtraSmall,
+                    start = Dimens.spacingMedium,
+                    end = Dimens.spacingMedium
+                )
             )
 
             Spacer(modifier = Modifier.height(Dimens.spacingLarge))
@@ -94,7 +104,8 @@ fun HomeScreen(
                 searchText = searchText,
                 listState = listState,
                 onPokemonClick = onPokemonClick,
-                onLoadMore = { viewModel.loadNextPage() }
+                onLoadMore = { viewModel.loadNextPage() },
+                viewModel = viewModel
             )
         }
 
@@ -108,15 +119,22 @@ fun HomeScreen(
 private fun ContentArea(
     state: PokemonState,
     searchText: String,
-    listState: androidx.compose.foundation.lazy.LazyListState,
+    listState: LazyListState,
     onPokemonClick: (pokemon: Pokemon, color: Color) -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    viewModel: PokemonViewModel
 ) {
     when (state) {
         is PokemonState.Error -> {
-            ErrorState(message = state.message)
+            // 搜索文本不为空的情况下（确定已经搜索过），才展示重试按钮
+            val showRetryButton = searchText.trim().isNotEmpty()
+            ErrorState(
+                message = state.message,
+                onRetry = if (showRetryButton) viewModel::searchPokemon else null
+            )
             Spacer(modifier = Modifier.height(Dimens.spacingLarge))
         }
+
         is PokemonState.Success -> {
             if (state.results.isNotEmpty()) {
                 LaunchedEffect(state.results.size) {
@@ -134,9 +152,11 @@ private fun ContentArea(
                 NoResultsState()
             }
         }
+
         is PokemonState.Idle -> {
             EmptyState()
         }
+
         is PokemonState.Loading -> {
         }
     }

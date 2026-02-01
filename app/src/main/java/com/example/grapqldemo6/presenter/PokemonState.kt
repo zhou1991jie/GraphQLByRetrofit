@@ -10,7 +10,8 @@ sealed class PokemonState {
         val hasNextPage: Boolean,
         val hasSearched: Boolean,
         val isNewSearch: Boolean = true,
-        val isLoadingMore: Boolean = false
+        val isLoadingMore: Boolean = false,
+        val loadMoreError: Boolean = false
     ) : PokemonState()
     data class Error(val message: String) : PokemonState()
 }

@@ -79,12 +79,12 @@ fun SearchBar(
 
 @Composable
 fun SearchErrorText(
-    showError: Boolean,
+    errorMessage: String?,
     modifier: Modifier = Modifier
 ) {
-    if (showError) {
+    errorMessage?.let {
         Text(
-            text = stringResource(R.string.search_input_error),
+            text = it,
             color = Color.Red,
             style = MaterialTheme.typography.bodySmall,
             modifier = modifier

@@ -20,11 +20,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.clickable
 import com.example.grapqldemo6.R
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.presenter.PokemonState
 import androidx.compose.ui.graphics.Color
 import com.example.grapqldemo6.ui.theme.Dimens
+import com.example.grapqldemo6.util.isFalse
 
 @Composable
 fun PokemonList(
@@ -48,6 +50,7 @@ fun PokemonList(
             LoadMoreItem(
                 hasNextPage = state.hasNextPage,
                 isLoadingMore = state.isLoadingMore,
+                loadMoreError = state.loadMoreError,
                 onLoadMore = onLoadMore
             )
         }
@@ -58,9 +61,10 @@ fun PokemonList(
 fun LoadMoreItem(
     hasNextPage: Boolean,
     isLoadingMore: Boolean,
+    loadMoreError: Boolean,
     onLoadMore: () -> Unit
 ) {
-    if (hasNextPage && !isLoadingMore) {
+    if (hasNextPage && isLoadingMore.isFalse() && loadMoreError.isFalse()) {
         LaunchedEffect(Unit) {
             onLoadMore()
         }
@@ -85,6 +89,35 @@ fun LoadMoreItem(
                 Text(
                     text = stringResource(R.string.loading_more),
                     style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+
+    if (loadMoreError) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.spacingLarge),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.error_network),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = Dimens.spacingMedium)
+                )
+                Text(
+                    text = stringResource(R.string.tap_to_retry),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        onLoadMore()
+                    }
                 )
             }
         }
