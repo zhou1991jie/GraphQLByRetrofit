@@ -31,7 +31,7 @@ import com.example.grapqldemo6.ui.theme.Dimens
 @Composable
 fun PokemonSpeciesItem(
     species: PokemonSpecies,
-    onPokemonClick: (Pokemon) -> Unit
+    onPokemonClick: (pokemon: Pokemon, color: Color) -> Unit
 ) {
     val color = getColorFromName(species.pokemon_v2_pokemoncolor?.name ?: "white")
     
@@ -129,7 +129,7 @@ private fun PokemonSectionTitle() {
 private fun PokemonList(
     pokemons: List<Pokemon>,
     color: Color,
-    onPokemonClick: (Pokemon) -> Unit
+    onPokemonClick: (pokemon: Pokemon, color: Color) -> Unit
 ) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
@@ -140,7 +140,7 @@ private fun PokemonList(
             PokemonChip(
                 name = pokemon.name,
                 color = color,
-                onClick = { onPokemonClick(pokemon) }
+                onClick = { onPokemonClick(pokemon, color) }
             )
         }
     }

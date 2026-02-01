@@ -5,10 +5,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.example.grapqldemo6.data.model.Pokemon
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import com.example.grapqldemo6.data.model.Pokemon
+import com.example.grapqldemo6.data.model.PokemonWithColor
 import com.example.grapqldemo6.util.PreferenceManager
 
 
@@ -32,18 +34,22 @@ fun PokemonApp(
 
         composable("home") {
             HomeScreen(
-                onPokemonClick = { pokemon ->
-                    navController.currentBackStackEntry?.savedStateHandle?.set("pokemon", pokemon)
+                onPokemonClick = { pokemon, color ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        "pokemonWithColor",
+                        PokemonWithColor(pokemon, color)
+                    )
                     navController.navigate("detail")
                 }
             )
         }
 
         composable("detail") {
-            val pokemon = navController.previousBackStackEntry?.savedStateHandle?.get<Pokemon>("pokemon")
-            pokemon?.let {
+            val pokemonWithColor = navController.previousBackStackEntry?.savedStateHandle?.get<PokemonWithColor>("pokemonWithColor")
+            pokemonWithColor?.let {
                 DetailScreen(
-                    pokemon = it,
+                    pokemon = it.pokemon,
+                    color = it.color,
                     onBack = { navController.popBackStack() }
                 )
             }

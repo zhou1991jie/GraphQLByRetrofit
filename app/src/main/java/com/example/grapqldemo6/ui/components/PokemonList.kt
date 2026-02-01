@@ -23,12 +23,13 @@ import androidx.compose.ui.res.stringResource
 import com.example.grapqldemo6.R
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.presenter.PokemonState
+import androidx.compose.ui.graphics.Color
 import com.example.grapqldemo6.ui.theme.Dimens
 
 @Composable
 fun PokemonList(
     state: PokemonState.Success,
-    onPokemonClick: (Pokemon) -> Unit,
+    onPokemonClick: (pokemon: Pokemon, color: Color) -> Unit,
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier
 ) {

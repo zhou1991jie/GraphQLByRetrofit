@@ -25,6 +25,7 @@
     
     <!-- 导航 -->
     <string name="nav_back">返回</string>
+    <string name="detail_title">详情页</string>
     <string name="welcome_title">欢迎使用宝可梦图鉴</string>
     <string name="welcome_subtitle">探索宝可梦的奇妙世界</string>
     <string name="welcome_button">开始探索</string>

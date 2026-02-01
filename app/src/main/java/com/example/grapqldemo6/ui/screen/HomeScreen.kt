@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +20,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.presenter.PokemonState
@@ -34,7 +36,7 @@ import com.example.grapqldemo6.ui.theme.Dimens
 
 @Composable
 fun HomeScreen(
-    onPokemonClick: (pokemon: Pokemon) -> Unit,
+    onPokemonClick: (pokemon: Pokemon, color: Color) -> Unit,
     viewModel: PokemonViewModel = hiltViewModel()
 ) {
     val searchText by viewModel.searchText.collectAsState()
@@ -47,7 +49,7 @@ fun HomeScreen(
     
     val isInputValid = Regex("^[a-zA-Z-]*$").matches(searchText)
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,10 +83,7 @@ fun HomeScreen(
 
             SearchErrorText(
                 showError = searchText.isNotEmpty() && !isInputValid,
-                modifier = Modifier.padding(
-                    top = Dimens.spacingExtraSmall,
-                    start = Dimens.spacingExtraSmall
-                )
+                modifier = Modifier.padding(top = Dimens.spacingExtraSmall)
             )
 
             Spacer(modifier = Modifier.height(Dimens.spacingLarge))
@@ -109,7 +108,7 @@ private fun ContentArea(
     state: PokemonState,
     searchText: String,
     listState: androidx.compose.foundation.lazy.LazyListState,
-    onPokemonClick: (pokemon: Pokemon) -> Unit,
+    onPokemonClick: (pokemon: Pokemon, color: Color) -> Unit,
     onLoadMore: () -> Unit
 ) {
     when (state) {
