@@ -33,6 +33,8 @@ import com.example.grapqldemo6.ui.components.PokemonList
 import com.example.grapqldemo6.ui.components.SearchBar
 import com.example.grapqldemo6.ui.components.SearchErrorText
 import com.example.grapqldemo6.ui.theme.Dimens
+import com.example.grapqldemo6.util.isFalse
+import com.example.grapqldemo6.util.isTrue
 
 @Composable
 fun HomeScreen(
@@ -40,14 +42,13 @@ fun HomeScreen(
     viewModel: PokemonViewModel = hiltViewModel()
 ) {
     val searchText by viewModel.searchText.collectAsState()
+    val hasInvalidInput by viewModel.hasInvalidInput.collectAsState()
     val state by viewModel.state.collectAsState()
     
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
-    
-    val isInputValid = Regex("^[a-zA-Z-]*$").matches(searchText)
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(
@@ -70,7 +71,7 @@ fun HomeScreen(
         ) {
             SearchBar(
                 searchText = searchText,
-                isInputValid = isInputValid,
+                isInputValid = hasInvalidInput.isFalse(),
                 isLoading = state is PokemonState.Loading,
                 onSearchTextChange = { viewModel.updateSearchText(it) },
                 onSearchClick = {
@@ -82,8 +83,8 @@ fun HomeScreen(
             )
 
             SearchErrorText(
-                showError = searchText.isNotEmpty() && !isInputValid,
-                modifier = Modifier.padding(top = Dimens.spacingExtraSmall)
+                showError = hasInvalidInput.isTrue(),
+                modifier = Modifier.padding(top = Dimens.spacingExtraSmall, start = Dimens.spacingMedium, end = Dimens.spacingMedium)
             )
 
             Spacer(modifier = Modifier.height(Dimens.spacingLarge))
