@@ -34,11 +34,8 @@ class PokemonViewModel @Inject constructor(
     private var currentPage = 0
 
     // 搜索失败时，确保加载状态至少显示500毫秒
-    private suspend fun ensureMinimumLoadingTime(startTime: Long, minimumTimeMs: Long = 500) {
-        val elapsedTime = System.currentTimeMillis() - startTime
-        if (elapsedTime < minimumTimeMs) {
-            delay(minimumTimeMs - elapsedTime)
-        }
+    private suspend fun ensureMinimumLoadingTime(minimumTimeMs: Long = 500) {
+        delay(minimumTimeMs)
     }
 
     fun updateSearchText(text: String) {
@@ -86,7 +83,7 @@ class PokemonViewModel @Inject constructor(
                     hasSearched = true
                 )
             } else {
-                ensureMinimumLoadingTime(startTime)
+                ensureMinimumLoadingTime()
                 val exception = result.exceptionOrNull()
                 if (exception != null) {
                     Log.e("PokemonViewModel", "Search pokemon failed: ${exception.message}", exception)
@@ -128,7 +125,7 @@ class PokemonViewModel @Inject constructor(
                     loadMoreError = false
                 )
             } else {
-                ensureMinimumLoadingTime(startTime)
+                ensureMinimumLoadingTime()
                 val exception = result.exceptionOrNull()
                 if (exception != null) {
                     Log.e("PokemonViewModel", "Load next page failed: ${exception.message}", exception)
