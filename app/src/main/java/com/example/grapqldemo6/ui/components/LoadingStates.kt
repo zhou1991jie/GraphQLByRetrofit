@@ -15,8 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.example.grapqldemo6.R
 import com.example.grapqldemo6.ui.theme.Dimens
 
 @Composable
@@ -37,7 +39,7 @@ fun FullScreenLoading() {
             )
             Spacer(modifier = Modifier.height(Dimens.spacingLarge))
             Text(
-                text = "搜索中...",
+                text = stringResource(R.string.searching),
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -66,7 +68,7 @@ fun EmptyState() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text("搜索更多宝可梦", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.search_pokemon), style = MaterialTheme.typography.titleLarge)
     }
 }
 
@@ -76,6 +78,6 @@ fun NoResultsState() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text("未找到相关宝可梦", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.no_results), style = MaterialTheme.typography.titleLarge)
     }
 }

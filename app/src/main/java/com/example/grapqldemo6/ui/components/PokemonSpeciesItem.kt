@@ -22,6 +22,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import com.example.grapqldemo6.R
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.data.model.PokemonSpecies
 import com.example.grapqldemo6.ui.theme.Dimens
@@ -97,7 +99,7 @@ private fun CaptureRateBadge(captureRate: Int) {
             .padding(Dimens.spacingMedium, Dimens.spacingExtraSmall)
     ) {
         Text(
-            text = "捕获率: $captureRate",
+            text = stringResource(R.string.capture_rate, captureRate),
             style = MaterialTheme.typography.bodySmall,
             color = Color.White,
             fontWeight = FontWeight.Bold
@@ -115,7 +117,7 @@ private fun PokemonSectionTitle() {
             .padding(Dimens.spacingMedium)
     ) {
         Text(
-            text = "包含的宝可梦:",
+            text = stringResource(R.string.pokemon_list),
             style = MaterialTheme.typography.titleMedium,
             color = Color.White,
             fontWeight = FontWeight.Bold

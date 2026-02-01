@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.grapqldemo6.R
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.presenter.PokemonState
 import com.example.grapqldemo6.ui.theme.Dimens
@@ -80,7 +82,7 @@ fun LoadMoreItem(
                 )
                 Spacer(modifier = Modifier.height(Dimens.spacingMedium))
                 Text(
-                    text = "加载中...",
+                    text = stringResource(R.string.loading_more),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

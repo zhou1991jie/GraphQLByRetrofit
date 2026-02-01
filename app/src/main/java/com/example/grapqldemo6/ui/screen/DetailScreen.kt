@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.grapqldemo6.R
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.ui.theme.Dimens
 
@@ -33,7 +35,7 @@ fun DetailScreen(
                 title = { Text(pokemon.name) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
                     }
                 }
             )
@@ -51,7 +53,7 @@ fun DetailScreen(
                 modifier = Modifier.padding(bottom = Dimens.spacingLarge)
             )
 
-            Text("技能列表:", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.abilities_list), style = MaterialTheme.typography.bodyLarge)
 
             LazyColumn {
                 items(pokemon.pokemon_v2_pokemonabilities ?: emptyList()) { ability ->
@@ -61,7 +63,7 @@ fun DetailScreen(
                             .padding(Dimens.spacingExtraSmall)
                     ) {
                         Text(
-                            text = ability.pokemon_v2_ability.name ?: "未知技能",
+                            text = ability.pokemon_v2_ability.name ?: stringResource(R.string.unknown_ability),
                             modifier = Modifier.padding(Dimens.spacingLarge)
                         )
                     }

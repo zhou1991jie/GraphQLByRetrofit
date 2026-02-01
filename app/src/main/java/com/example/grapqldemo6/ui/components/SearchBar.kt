@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.res.stringResource
+import com.example.grapqldemo6.R
 import com.example.grapqldemo6.ui.theme.Dimens
 
 @Composable
@@ -39,7 +41,7 @@ fun SearchBar(
         OutlinedTextField(
             value = searchText,
             onValueChange = onSearchTextChange,
-            placeholder = { Text("输入宝可梦名称...") },
+            placeholder = { Text(stringResource(R.string.search_hint)) },
             modifier = Modifier.weight(1f),
             singleLine = true,
             isError = searchText.isNotEmpty() && !isInputValid,
@@ -66,7 +68,7 @@ fun SearchBar(
                     strokeWidth = Dimens.progressStrokeSmall
                 )
             } else {
-                Text("搜索")
+                Text(stringResource(R.string.search_button))
             }
         }
     }
@@ -79,7 +81,7 @@ fun SearchErrorText(
 ) {
     if (showError) {
         Text(
-            text = "只能输入英文字符和中划线",
+            text = stringResource(R.string.search_input_error),
             color = Color.Red,
             style = MaterialTheme.typography.bodySmall,
             modifier = modifier
