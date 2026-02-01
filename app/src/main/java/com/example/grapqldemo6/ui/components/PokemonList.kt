@@ -20,7 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.clickable
+import androidx.compose.material3.OutlinedButton
 import com.example.grapqldemo6.R
 import com.example.grapqldemo6.data.model.Pokemon
 import com.example.grapqldemo6.presenter.PokemonState
@@ -107,18 +107,19 @@ fun LoadMoreItem(
             ) {
                 Text(
                     text = stringResource(R.string.error_network),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(bottom = Dimens.spacingMedium)
+                    color = Color.Red,
                 )
-                Text(
-                    text = stringResource(R.string.tap_to_retry),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable {
+                Spacer(modifier = Modifier.height(Dimens.spacingMedium))
+                OutlinedButton(
+                    onClick = {
                         onLoadMore()
                     }
-                )
+                ) {
+                    Text(
+                        text = stringResource(R.string.tap_to_retry),
+                        color = Color.Red
+                    )
+                }
             }
         }
     }

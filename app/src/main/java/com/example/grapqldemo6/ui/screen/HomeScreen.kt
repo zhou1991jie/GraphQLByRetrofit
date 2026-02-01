@@ -34,8 +34,6 @@ import com.example.grapqldemo6.ui.components.PokemonList
 import com.example.grapqldemo6.ui.components.SearchBar
 import com.example.grapqldemo6.ui.components.SearchErrorText
 import com.example.grapqldemo6.ui.theme.Dimens
-import com.example.grapqldemo6.util.isFalse
-import com.example.grapqldemo6.util.isTrue
 import com.example.grapqldemo6.util.isNull
 
 @Composable

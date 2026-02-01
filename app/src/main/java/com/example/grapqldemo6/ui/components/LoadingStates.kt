@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,12 +62,12 @@ fun ErrorState(message: String, onRetry: (() -> Unit)? = null) {
             )
             onRetry?.let {
                 Spacer(modifier = Modifier.height(Dimens.spacingMedium))
-                androidx.compose.material3.TextButton(
+                OutlinedButton(
                     onClick = it
                 ) {
                     Text(
                         text = stringResource(R.string.tap_to_retry),
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color.Red
                     )
                 }
             }
