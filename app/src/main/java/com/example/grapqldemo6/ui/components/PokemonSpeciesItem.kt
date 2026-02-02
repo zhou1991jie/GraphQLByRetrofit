@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -92,7 +93,7 @@ private fun SpeciesHeader(
 
 @Composable
 private fun CaptureRateBadge(captureRate: Int) {
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .clip(RoundedCornerShape(Dimens.borderRadiusMedium))
             .background(Color.Red)
@@ -109,7 +110,7 @@ private fun CaptureRateBadge(captureRate: Int) {
 
 @Composable
 private fun PokemonSectionTitle() {
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dimens.borderRadiusSmall))
@@ -152,7 +153,7 @@ private fun PokemonChip(
     color: Color,
     onClick: () -> Unit
 ) {
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .clip(RoundedCornerShape(Dimens.borderRadiusSmall))
             .background(color)
