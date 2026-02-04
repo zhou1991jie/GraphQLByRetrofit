@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,15 +20,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.res.stringResource
 import com.example.grapqldemo6.R
+import com.example.grapqldemo6.data.ApiConstants
 import com.example.grapqldemo6.ui.theme.Dimens
 
 @Composable
 fun SearchBar(
     searchText: String,
     isInputValid: Boolean,
+    isDesc: String,
     isLoading: Boolean,
     onSearchTextChange: (String) -> Unit,
-    onCleanButtonClick:() -> Unit,
+    onCleanButtonClick: () -> Unit,
+    onOrderButtonClick: () -> Unit,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -67,6 +68,14 @@ fun SearchBar(
             Text(stringResource(R.string.search_button))
         }
         Spacer(modifier = Modifier.width(Dimens.spacingExtraSmall))
+
+        Button(
+            onClick = onOrderButtonClick,
+            enabled = searchText.isNotBlank() && isInputValid && !isLoading,
+            modifier = Modifier.height(Dimens.buttonHeight)
+        ) {
+            Text(stringResource(if (isDesc == ApiConstants.PAGE_DESC) R.string.order_des else R.string.order_asc))
+        }
 
         Button(
             onClick = onCleanButtonClick,

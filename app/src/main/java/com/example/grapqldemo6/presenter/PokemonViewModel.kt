@@ -27,6 +27,9 @@ class PokemonViewModel @Inject constructor(
     private val _searchText = MutableStateFlow("")
     val searchText: StateFlow<String> = _searchText.asStateFlow()
 
+    private val _isDESC = MutableStateFlow(ApiConstants.PAGE_ASC)
+    val isDESC = _isDESC.asStateFlow()
+
     private val _inputError = MutableStateFlow<String?>(null)
     val inputError: StateFlow<String?> = _inputError.asStateFlow()
 
@@ -35,6 +38,11 @@ class PokemonViewModel @Inject constructor(
 
     private var currentPage = 0
 
+    fun updateDes(isDesc: String) {
+        searchPokemon()
+        _isDESC.value =
+            if (isDesc == ApiConstants.PAGE_ASC) ApiConstants.PAGE_DESC else ApiConstants.PAGE_ASC
+    }
 
     fun updateSearchText(text: String) {
         val filteredText = text.filter { Constants.VALID_INPUT_REGEX.matches(it.toString()) }
@@ -59,7 +67,7 @@ class PokemonViewModel @Inject constructor(
 
     fun searchPokemon() {
 
-        if(_state.value is PokemonState.Success){
+        if (_state.value is PokemonState.Success) {
             val state = _state.value as PokemonState.Success
             if (state.hasNextPage.isFalse()) {
                 _state.value = state.copy(
@@ -79,7 +87,8 @@ class PokemonViewModel @Inject constructor(
             _state.value = PokemonState.Loading
             val result = pokemonUseCase.searchPokemonByName(
                 name = searchQuery,
-                page = 0
+                page = 0,
+                orderBy = _isDESC.value
             )
             if (result.isSuccess) {
                 val pokemonData = result.getOrNull()
@@ -110,7 +119,7 @@ class PokemonViewModel @Inject constructor(
 
     fun loadNextPage() {
 
-        if(_state.value is PokemonState.Success){
+        if (_state.value is PokemonState.Success) {
             val state = _state.value as PokemonState.Success
             if (state.hasNextPage.isFalse()) {
                 _state.value = state.copy(
@@ -130,7 +139,8 @@ class PokemonViewModel @Inject constructor(
             _state.value = currentState.copy(isLoadingMore = true)
             val result = pokemonUseCase.loadNextPage(
                 name = searchQuery,
-                currentPage = currentPage
+                currentPage = currentPage,
+                orderBy = _isDESC.value
             )
             if (result.isSuccess) {
                 val pokemonData = result.getOrNull()
