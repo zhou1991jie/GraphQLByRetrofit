@@ -64,15 +64,7 @@ fun SearchBar(
             enabled = searchText.isNotBlank() && isInputValid && !isLoading,
             modifier = Modifier.height(Dimens.buttonHeight)
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(Dimens.iconSmall),
-                    color = Color.White,
-                    strokeWidth = Dimens.progressStrokeSmall
-                )
-            } else {
-                Text(stringResource(R.string.search_button))
-            }
+            Text(stringResource(R.string.search_button))
         }
     }
 }
