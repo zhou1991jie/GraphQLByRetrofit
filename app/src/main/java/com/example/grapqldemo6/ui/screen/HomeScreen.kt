@@ -83,6 +83,9 @@ fun HomeScreen(
                     keyboardController?.hide()
                     viewModel.searchPokemon()
                 },
+                onCleanButtonClick = {
+                    viewModel.updateSearchText("")
+                },
                 modifier = Modifier.focusRequester(focusRequester)
             )
 

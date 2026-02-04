@@ -30,6 +30,7 @@ fun SearchBar(
     isInputValid: Boolean,
     isLoading: Boolean,
     onSearchTextChange: (String) -> Unit,
+    onCleanButtonClick:() -> Unit,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -57,14 +58,22 @@ fun SearchBar(
             )
         )
 
-        Spacer(modifier = Modifier.width(Dimens.spacingMedium))
-
+        Spacer(modifier = Modifier.width(Dimens.spacingExtraSmall))
         Button(
             onClick = onSearchClick,
             enabled = searchText.isNotBlank() && isInputValid && !isLoading,
             modifier = Modifier.height(Dimens.buttonHeight)
         ) {
             Text(stringResource(R.string.search_button))
+        }
+        Spacer(modifier = Modifier.width(Dimens.spacingExtraSmall))
+
+        Button(
+            onClick = onCleanButtonClick,
+            enabled = searchText.isNotBlank() && isInputValid && !isLoading,
+            modifier = Modifier.height(Dimens.buttonHeight)
+        ) {
+            Text(stringResource(R.string.clean_button))
         }
     }
 }

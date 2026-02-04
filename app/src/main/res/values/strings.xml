@@ -4,6 +4,7 @@
     <!-- 搜索相关 -->
     <string name="search_hint">输入宝可梦名称…</string>
     <string name="search_button">搜索</string>
+    <string name="clean_button">清除</string>
     <string name="search_input_error">只能输入英文字符和中划线</string>
     <string name="searching">搜索中…</string>
     
