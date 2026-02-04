@@ -14,6 +14,8 @@ import kotlinx.coroutines.delay
 import android.content.Context
 import android.util.Log
 import com.example.grapqldemo6.R
+import com.example.grapqldemo6.data.ApiConstants
+import com.example.grapqldemo6.util.isFalse
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,17 +39,17 @@ class PokemonViewModel @Inject constructor(
     fun updateSearchText(text: String) {
         val filteredText = text.filter { Constants.VALID_INPUT_REGEX.matches(it.toString()) }
         _searchText.value = filteredText
-        
+
         // 检测是否输入了非法字符
         val hasInvalidChars = text != filteredText
-        
+
         // 重置输入错误状态
         _inputError.value = if (hasInvalidChars) {
             context.getString(R.string.search_input_error)
         } else {
             null
         }
-        
+
         // 当用户修改搜索文本时，重置为 Idle 状态，避免自动显示未找到结果的提示
         val currentState = _state.value
         if (currentState is PokemonState.Success || currentState is PokemonState.Error) {
@@ -56,6 +58,17 @@ class PokemonViewModel @Inject constructor(
     }
 
     fun searchPokemon() {
+
+        if(_state.value is PokemonState.Success){
+            val state = _state.value as PokemonState.Success
+            if (state.hasNextPage.isFalse()) {
+                _state.value = state.copy(
+                    hasNextPage = false
+                )
+                return
+            }
+        }
+
         val searchQuery = _searchText.value.trim()
         if (searchQuery.isEmpty()) {
             _inputError.value = context.getString(R.string.error_empty_input)
@@ -71,17 +84,22 @@ class PokemonViewModel @Inject constructor(
             if (result.isSuccess) {
                 val pokemonData = result.getOrNull()
                 val speciesList = pokemonData?.pokemon_v2_pokemonspecies ?: emptyList()
+                val hasNextPage = (speciesList.size < ApiConstants.PAGE_SIZE).isFalse()
                 currentPage = 0
                 _state.value = PokemonState.Success(
                     results = speciesList,
-                    hasNextPage = speciesList.isNotEmpty(),
+                    hasNextPage = hasNextPage,
                     hasSearched = true
                 )
             } else {
                 delay(500)
                 val exception = result.exceptionOrNull()
                 if (exception != null) {
-                    Log.e("PokemonViewModel", "Search pokemon failed: ${exception.message}", exception)
+                    Log.e(
+                        "PokemonViewModel",
+                        "Search pokemon failed: ${exception.message}",
+                        exception
+                    )
                 }
                 _state.value = PokemonState.Error(
                     message = context.getString(R.string.error_network)
@@ -91,6 +109,17 @@ class PokemonViewModel @Inject constructor(
     }
 
     fun loadNextPage() {
+
+        if(_state.value is PokemonState.Success){
+            val state = _state.value as PokemonState.Success
+            if (state.hasNextPage.isFalse()) {
+                _state.value = state.copy(
+                    hasNextPage = false
+                )
+                return
+            }
+        }
+
         val searchQuery = _searchText.value.trim()
         if (searchQuery.isEmpty()) return
 
@@ -107,12 +136,13 @@ class PokemonViewModel @Inject constructor(
                 val pokemonData = result.getOrNull()
                 val speciesList = pokemonData?.pokemon_v2_pokemonspecies ?: emptyList()
                 val isNotEmpty = speciesList.isNotEmpty()
+                val hasNextPage = (speciesList.size < ApiConstants.PAGE_SIZE).isFalse()
                 if (isNotEmpty) {
                     currentPage++
                 }
                 _state.value = PokemonState.Success(
                     results = if (isNotEmpty) currentState.results + speciesList else currentState.results,
-                    hasNextPage = isNotEmpty,
+                    hasNextPage = hasNextPage,
                     hasSearched = true,
                     isNewSearch = false,
                     isLoadingMore = false,
@@ -122,7 +152,11 @@ class PokemonViewModel @Inject constructor(
                 delay(500)
                 val exception = result.exceptionOrNull()
                 if (exception != null) {
-                    Log.e("PokemonViewModel", "Load next page failed: ${exception.message}", exception)
+                    Log.e(
+                        "PokemonViewModel",
+                        "Load next page failed: ${exception.message}",
+                        exception
+                    )
                 }
                 // 加载更多失败时，保持现有数据，只重置加载状态并显示错误消息
                 _state.value = currentState.copy(

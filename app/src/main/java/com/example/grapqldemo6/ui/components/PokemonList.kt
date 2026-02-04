@@ -64,12 +64,26 @@ fun LoadMoreItem(
     loadMoreError: Boolean,
     onLoadMore: () -> Unit
 ) {
+
+    if (hasNextPage.isFalse()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.spacingLarge),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.no_more_data),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        return
+    }
     if (hasNextPage && isLoadingMore.isFalse() && loadMoreError.isFalse()) {
         LaunchedEffect(Unit) {
             onLoadMore()
         }
     }
-
     if (isLoadingMore) {
         Box(
             modifier = Modifier
@@ -123,4 +137,6 @@ fun LoadMoreItem(
             }
         }
     }
+
+
 }

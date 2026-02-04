@@ -11,7 +11,6 @@ class PokemonRepository @Inject constructor(
     private val pokemonApiService: PokemonApiService
 ) {
 
-    private val pageSize = 10
 
     suspend fun searchPokemonByName(name: String, page: Int = 0): Result<PokemonData> {
         return withContext(Dispatchers.IO) {
@@ -19,8 +18,8 @@ class PokemonRepository @Inject constructor(
                 val query = GraphQLQueries.SEARCH_POKEMON_SPECIES
                 val variables = mapOf(
                     "name" to "%$name%",
-                    "limit" to pageSize,
-                    "offset" to page * pageSize
+                    "limit" to ApiConstants.PAGE_SIZE,
+                    "offset" to page * ApiConstants.PAGE_SIZE
                 )
 
                 val request = GraphQLRequest(

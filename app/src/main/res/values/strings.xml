@@ -10,6 +10,7 @@
     
     <!-- 加载状态 -->
     <string name="loading_more">加载中…</string>
+    <string name="no_more_data">没有更多数据了</string>
     <string name="no_results">未找到相关宝可梦</string>
     <string name="search_pokemon">搜索更多宝可梦</string>
     
