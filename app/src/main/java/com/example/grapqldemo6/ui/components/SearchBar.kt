@@ -27,7 +27,6 @@ import com.example.grapqldemo6.ui.theme.Dimens
 fun SearchBar(
     searchText: String,
     isInputValid: Boolean,
-    isDesc: String,
     isLoading: Boolean,
     onSearchTextChange: (String) -> Unit,
     onCleanButtonClick: () -> Unit,
@@ -74,7 +73,7 @@ fun SearchBar(
             enabled = searchText.isNotBlank() && isInputValid && !isLoading,
             modifier = Modifier.height(Dimens.buttonHeight)
         ) {
-            Text(stringResource(if (isDesc == ApiConstants.PAGE_DESC) R.string.order_des else R.string.order_asc))
+            Text("排序")
         }
 
         Button(

@@ -27,8 +27,8 @@ class PokemonViewModel @Inject constructor(
     private val _searchText = MutableStateFlow("")
     val searchText: StateFlow<String> = _searchText.asStateFlow()
 
-    private val _isDESC = MutableStateFlow(ApiConstants.PAGE_ASC)
-    val isDESC = _isDESC.asStateFlow()
+    private val _sortOrder = MutableStateFlow(ApiConstants.PAGE_ASC)
+    val sortOrder = _sortOrder.asStateFlow()
 
     private val _inputError = MutableStateFlow<String?>(null)
     val inputError: StateFlow<String?> = _inputError.asStateFlow()
@@ -38,10 +38,10 @@ class PokemonViewModel @Inject constructor(
 
     private var currentPage = 0
 
-    fun updateDes(isDesc: String) {
+    fun toggleSortOrder() {
+        _sortOrder.value =
+            if (_sortOrder.value == ApiConstants.PAGE_ASC) ApiConstants.PAGE_DESC else ApiConstants.PAGE_ASC
         searchPokemon()
-        _isDESC.value =
-            if (isDesc == ApiConstants.PAGE_ASC) ApiConstants.PAGE_DESC else ApiConstants.PAGE_ASC
     }
 
     fun updateSearchText(text: String) {
@@ -88,7 +88,7 @@ class PokemonViewModel @Inject constructor(
             val result = pokemonUseCase.searchPokemonByName(
                 name = searchQuery,
                 page = 0,
-                orderBy = _isDESC.value
+                orderBy = _sortOrder.value
             )
             if (result.isSuccess) {
                 val pokemonData = result.getOrNull()
@@ -140,7 +140,7 @@ class PokemonViewModel @Inject constructor(
             val result = pokemonUseCase.loadNextPage(
                 name = searchQuery,
                 currentPage = currentPage,
-                orderBy = _isDESC.value
+                orderBy = _sortOrder.value
             )
             if (result.isSuccess) {
                 val pokemonData = result.getOrNull()

@@ -39,48 +39,13 @@ object GraphQLQueries {
         ${'$'}name: String,
         ${'$'}limit: Int,
         ${'$'}offset: Int,
-        ${'$'}order_by: String
+        ${'$'}orderBy: [pokemon_v2_pokemonspecies_order_by!]
         ) {
             pokemon_v2_pokemonspecies(
              where: {name: {_ilike: ${'$'}name}},
              limit: ${'$'}limit,
              offset: ${'$'}offset,
-             order_by:{capture_rate: asc}
-             ) {
-                id
-                name
-                capture_rate
-                pokemon_v2_pokemoncolor {
-                    id
-                    name
-                }
-                pokemon_v2_pokemons {
-                    id
-                    name
-                    pokemon_v2_pokemonabilities {
-                        id
-                        pokemon_v2_ability {
-                            name
-                        }
-                    }
-                }
-            }
-        }
-    """.trimIndent()
-
-
-    val SEARCH_POKEMON_SPECIES_DESC = """
-        query searchPokemonSpecies(
-        ${'$'}name: String,
-        ${'$'}limit: Int,
-        ${'$'}offset: Int,
-        ${'$'}order_by: String
-        ) {
-            pokemon_v2_pokemonspecies(
-             where: {name: {_ilike: ${'$'}name}},
-             limit: ${'$'}limit,
-             offset: ${'$'}offset,
-             order_by:{capture_rate: desc}
+             order_by: ${'$'}orderBy
              ) {
                 id
                 name

@@ -44,7 +44,6 @@ fun HomeScreen(
     val searchText by viewModel.searchText.collectAsState()
     val inputError by viewModel.inputError.collectAsState()
     val state by viewModel.state.collectAsState()
-    val isDesc by viewModel.isDESC.collectAsState()
 
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
@@ -89,9 +88,8 @@ fun HomeScreen(
                 },
                 modifier = Modifier.focusRequester(focusRequester),
                 onOrderButtonClick = {
-                    viewModel.updateDes(isDesc)
-                },
-                isDesc = isDesc
+                    viewModel.toggleSortOrder()
+                }
             )
 
             SearchErrorText(

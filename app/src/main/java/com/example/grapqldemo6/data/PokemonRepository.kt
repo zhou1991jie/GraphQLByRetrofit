@@ -15,17 +15,16 @@ class PokemonRepository @Inject constructor(
     suspend fun searchPokemonByName(
         name: String,
         page: Int = 0,
-        orderBy: String
+        orderBy: String = ApiConstants.PAGE_ASC
     ): Result<PokemonData> {
         return withContext(Dispatchers.IO) {
             try {
-                val query = if(orderBy == ApiConstants.PAGE_ASC)GraphQLQueries.SEARCH_POKEMON_SPECIES else GraphQLQueries.SEARCH_POKEMON_SPECIES_DESC
+                val query = GraphQLQueries.SEARCH_POKEMON_SPECIES
                 val variables = mapOf(
                     "name" to "%$name%",
                     "limit" to ApiConstants.PAGE_SIZE,
                     "offset" to page * ApiConstants.PAGE_SIZE,
-//                    "orderBy" to orderBy
-//                    "orderBy" to ApiConstants.PAGE_ASC
+                    "orderBy" to listOf(mapOf("capture_rate" to orderBy))
                 )
 
                 val request = GraphQLRequest(
